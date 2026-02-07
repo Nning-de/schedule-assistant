@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日程养成助手 Pro - 火山女儿风格</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary: #ff6b9d;
+            --secondary: #6a5acd;
+            --accent: #4ecdc4;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #20c997;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --study: #6a5acd;
+            --work: #20c997;
+            --social: #ff6b9d;
+            --entertainment: #ffc107;
+            --health: #4ecdc4;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent));
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+        
+        /* 角色管理样式 */
+        .character-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .character-info {
+            flex: 1;
+        }
+        
+        .character-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+        
+        .character-level {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .character-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #ff4d87;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5949c2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        
+        /* 属性样式 */
+        .attributes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .attribute {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .attribute-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .attribute-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* 活动类别标签 */
+        .activity-category {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .category-study { background: rgba(106, 90, 205, 0.2); color: var(--study); }
+        .category-work { background: rgba(32, 201, 151, 0.2); color: var(--work); }
+        .category-social { background: rgba(255, 107, 157, 0.2); color: var(--social); }
+        .category-entertainment { background: rgba(255, 193, 7, 0.2); color: var(--entertainment); }
+        .category-health { background: rgba(78, 205, 196, 0.2); color: var(--health); }
+        
+        /* 日程表样式 */
+        .week-indicator {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .week-nav {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .week-nav:hover {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+        
+        .week-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .schedule-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+        
+        .day-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 3px 10px var(--shadow);
+            transition: all 0.3s ease;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .day-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .day-name {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 1rem;
+        }
+        
+        .day-number {
+            background: var(--accent);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .activity-select {
+            width: 100%;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            font-size: 0.85rem;
+            margin-top: auto;
+            cursor: pointer;
+        }
+        
+        .selected-activity {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(78, 205, 196, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+        
+        .activity-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        /* 事件和成就样式 */
+        .event-list, .achievement-list {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .event-item, .achievement-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .event-item {
+            background: rgba(106, 90, 205, 0.1);
+            border-left: 3px solid var(--secondary);
+        }
+        
+        .achievement-item {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 3px solid var(--warning);
+        }
+        
+        .event-date, .achievement-date {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 0.85rem;
+        }
+        
+        .event-desc, .achievement-desc {
+            flex: 1;
+            margin: 0 10px;
+            font-size: 0.9rem;
+        }
+        
+        .event-effect {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .stat-change {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .positive { background: rgba(32, 201, 151, 0.2); color: var(--success); }
+        .negative { background: rgba(220, 53, 69, 0.2); color: var(--danger); }
+        
+        /* 图表容器 */
+        .chart-container {
+            height: 200px;
+            margin-top: 15px;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        /* 随机事件样式 */
+        .random-event {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-top: 4px solid var(--warning);
+            z-index: 100;
+            max-width: 300px;
+            animation: slideIn 0.5s ease;
+            display: none;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .schedule-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .schedule-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .activity-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .schedule-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .character-section {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calendar-star"></i> 日程养成助手 Pro</h1>
+            <p class="subtitle">管理多个角色，记录成长历程，解锁丰富成就</p>
+            <div class="week-indicator">
+                <button class="week-nav" id="prev-week"><i class="fas fa-chevron-left"></i></button>
+                <div class="week-title">第 <span id="current-week">1</span> 周 / 本月第 <span id="current-month-week">1</span> 周</div>
+                <button class="week-nav" id="next-week"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </header>
+        
+        <div class="main-layout">
+            <!-- 左侧边栏 -->
+            <div class="sidebar">
+                <!-- 角色管理 -->
+                <div class="card">
+                    <h3><i class="fas fa-user-circle"></i> 角色管理</h3>
+                    <div class="character-section">
+                        <div class="character-avatar" id="current-avatar">A</div>
+                        <div class="character-info">
+                            <div class="character-name" id="current-character">默认角色</div>
+                            <div class="character-level">第 <span id="character-week">1</span> 周</div>
+                        </div>
+                        <div class="character-actions">
+                            <button class="btn btn-secondary btn-small" id="new-character"><i class="fas fa-plus"></i></button>
+                            <button class="btn btn-secondary btn-small" id="switch-character"><i class="fas fa-sync"></i></button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" id="save-data">
+                        <i class="fas fa-save"></i> 保存进度
+                    </button>
+                </div>
+                
+                <!-- 属性面板 -->
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> 角色属性</h3>
+                    <div class="attributes">
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <i class="fas fa-brain" style="color: #6a5acd;"></i>
+                                <span>智力</span>
+                            </div>
+                            <div class="attribute-value" id="intelligence">75</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="intelligence-bar" style="width: 75%; background: #6a5acd;"></div>
+                        </div>
+                        
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <i class="fas fa-heart" style="color: #ff6b9d;"></i>
+                                <span>魅力</span>
+                            </div>
+                            <div class="attribute-value" id="charm">60</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="charm-bar" style="width: 60%; background: #ff6b9d;"></div>
+                        </div>
+                        
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <i class="fas fa-dumbbell" style="color: #4ecdc4;"></i>
+                                <span>体力</span>
+                            </div>
+                            <div class="attribute-value" id="stamina">80</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="stamina-bar" style="width: 80%; background: #4ecdc4;"></div>
+                        </div>
+                        
+                        <div class="attribute">
+                            <div class="attribute-name">
+                                <i class="fas fa-coins" style="color: #ffc107;"></i>
+                                <span>资金</span>
+                            </div>
+                            <div class="attribute-value" id="money">450</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="money-bar" style="width: 45%; background: #ffc107;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 成就面板 -->
+                <div class="card">
+                    <h3><i class="fas fa-trophy"></i> 成就系统</h3>
+                    <div class="achievement-list" id="achievement-list">
+                        <!-- 成就动态生成 -->
+                    </div>
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="showAchievements()">
+                        <i class="fas fa-medal"></i> 查看所有成就
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 主要内容 -->
+            <div class="main-content">
+                <!-- 标签页 -->
+                <div class="card">
+                    <div class="tab-container">
+                        <div class="tabs">
+                            <button class="tab active" data-tab="schedule">日程安排</button>
+                            <button class="tab" data-tab="statistics">成长统计</button>
+                            <button class="tab" data-tab="activities">活动库</button>
+                            <button class="tab" data-tab="events">事件记录</button>
+                        </div>
+                        
+                        <!-- 日程安排标签 -->
+                        <div class="tab-content active" id="schedule-tab">
+                            <div class="schedule-container" id="schedule-container">
+                                <!-- 日程动态生成 -->
+                            </div>
+                            <div class="activity-actions">
+                                <button class="btn btn-secondary" id="reset-week">
+                                    <i class="fas fa-redo"></i> 重置本周安排
+                                </button>
+                                <button class="btn btn-primary" id="confirm-week">
+                                    <i class="fas fa-check-circle"></i> 确认本周安排
+                                </button>
+                                <button class="btn btn-secondary" id="random-event-btn">
+                                    <i class="fas fa-dice"></i> 随机事件
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 统计图表标签 -->
+                        <div class="tab-content" id="statistics-tab">
+                            <div class="chart-container">
+                                <canvas id="growth-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- 活动库标签 -->
+                        <div class="tab-content" id="activities-tab">
+                            <div id="activities-library">
+                                <!-- 活动库动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 事件记录标签 -->
+                        <div class="tab-content" id="events-tab">
+                            <div class="event-list" id="event-list">
+                                <!-- 事件动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 目标和随机事件 -->
+                <div class="card">
+                    <h3><i class="fas fa-bullseye"></i> 本周目标</h3>
+                    <div id="weekly-goals">
+                        <!-- 目标动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 随机事件弹窗 -->
+    <div class="random-event" id="random-event">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <i class="fas fa-exclamation-triangle" style="color: var(--warning); font-size: 1.2rem;"></i>
+            <strong style="color: var(--secondary);">随机事件</strong>
+        </div>
+        <div id="random-event-desc"></div>
+        <div id="random-event-effects" style="margin-top: 10px;"></div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="closeRandomEvent()">
+            确认
+        </button>
+    </div>
+    
+    <!-- 角色管理模态框 -->
+    <div class="modal" id="character-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">角色管理</h3>
+                <button class="close-modal" onclick="closeModal('character-modal')">&times;</button>
+            </div>
+            <div id="character-list">
+                <!-- 角色列表动态生成 -->
+            </div>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="createNewCharacter()">
+                <i class="fas fa-plus"></i> 创建新角色
+            </button>
+        </div>
+    </div>
+    
+    <!-- 成就查看模态框 -->
+    <div class="modal" id="achievements-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">成就系统</h3>
+                <button class="close-modal" onclick="closeModal('achievements-modal')">&times;</button>
+            </div>
+            <div id="all-achievements">
+                <!-- 所有成就动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 数据持久化系统 ====================
+        class DataManager {
+            constructor() {
+                this.STORAGE_KEY = 'schedule_pro_data';
+                this.loadData();
+            }
+            
+            loadData() {
+                const saved = localStorage.getItem(this.STORAGE_KEY);
+                if (saved) {
+                    try {
+                        return JSON.parse(saved);
+                    } catch (e) {
+                        console.error('加载数据失败:', e);
+                        return this.getDefaultData();
+                    }
+                }
+                return this.getDefaultData();
+            }
+            
+            saveData(data) {
+                try {
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+                    return true;
+                } catch (e) {
+                    console.error('保存数据失败:', e);
+                    return false;
+                }
+            }
+            
+            getDefaultData() {
+                return {
+                    version: '2.0',
+                    characters: [this.createDefaultCharacter()],
+                    currentCharacterId: 0,
+                    lastSave: Date.now()
+                };
+            }
+            
+            createDefaultCharacter() {
+                return {
+                    id: 0,
+                    name: '默认角色',
+                    avatar: 'A',
+                    week: 1,
+                    monthWeek: 1,
+                    attributes: {
+                        intelligence: 75,
+                        charm: 60,
+                        stamina: 80,
+                        money: 450
+                    },
+                    weekSchedule: {},
+                    events: [],
+                    achievements: [],
+                    statsHistory: [],
+                    createdAt: Date.now()
+                };
+            }
+        }
+
+        // ==================== 应用主类 ====================
+        class ScheduleProApp {
+            constructor() {
+                this.dataManager = new DataManager();
+                this.appData = this.dataManager.loadData();
+                this.currentChar = this.getCurrentCharacter();
+                
+                // 扩展活动类型
+                this.activityCategories = {
+                    study: { name: '学习', color: '#6a5acd', icon: 'book' },
+                    work: { name: '工作', color: '#20c997', icon: 'briefcase' },
+                    social: { name: '社交', color: '#ff6b9d', icon: 'users' },
+                    entertainment: { name: '娱乐', color: '#ffc107', icon: 'gamepad' },
+                    health: { name: '健康', color: '#4ecdc4', icon: 'heartbeat' }
+                };
+                
+                this.activities = this.getEnhancedActivities();
+                this.weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                this.randomEvents = this.getRandomEvents();
+                this.achievements = this.getAchievements();
+                
+                this.chart = null;
+                this.init();
+            }
+            
+            getCurrentCharacter() {
+                return this.appData.characters[this.appData.currentCharacterId] || 
+                      this.appData.characters[0];
+            }
+            
+            getEnhancedActivities() {
+                return [
+                    // 学习类
+                    { id: 'study_lib', name: '图书馆学习', category: 'study', 
+                      desc: '在图书馆专心学习', effect: { intelligence: 8, stamina: -4 }, cost: 0 },
+                    { id: 'study_online', name: '在线课程', category: 'study',
+                      desc: '学习在线专业课程', effect: { intelligence: 6, money: -20 }, cost: 20 },
+                    { id: 'study_language', name: '语言学习', category: 'study',
+                      desc: '学习外语', effect: { intelligence: 5, charm: 3 }, cost: 10 },
+                    
+                    // 工作类
+                    { id: 'work_part', name: '兼职工作', category: 'work',
+                      desc: '打工赚取资金', effect: { money: 40, stamina: -8 }, cost: 0 },
+                    { id: 'work_freelance', name: '自由职业', category: 'work',
+                      desc: '接外包项目', effect: { money: 60, intelligence: 2, stamina: -10 }, cost: 0 },
+                    { id: 'work_intern', name: '实习', category: 'work',
+                      desc: '公司实习锻炼', effect: { intelligence: 4, charm: 3, money: 30 }, cost: 0 },
+                    
+                    // 社交类
+                    { id: 'social_party', name: '朋友聚会', category: 'social',
+                      desc: '参加朋友聚会', effect: { charm: 8, money: -25 }, cost: 25 },
+                    { id: 'social_volunteer', name: '志愿者活动', category: 'social',
+                      desc: '参加公益活动', effect: { charm: 6, stamina: 3 }, cost: 0 },
+                    { id: 'social_club', name: '社团活动', category: 'social',
+                      desc: '参加兴趣社团', effect: { charm: 5, intelligence: 2 }, cost: 10 },
+                    
+                    // 娱乐类
+                    { id: 'entertainment_movie', name: '看电影', category: 'entertainment',
+                      desc: '影院观影放松', effect: { stamina: 6, money: -35 }, cost: 35 },
+                    { id: 'entertainment_game', name: '玩游戏', category: 'entertainment',
+                      desc: '游戏娱乐', effect: { stamina: 5, intelligence: 1 }, cost: 0 },
+                    { id: 'entertainment_art', name: '艺术欣赏', category: 'entertainment',
+                      desc: '参观美术馆', effect: { charm: 4, intelligence: 3 }, cost: 15 },
+                    
+                    // 健康类
+                    { id: 'health_gym', name: '健身房', category: 'health',
+                      desc: '进行体能训练', effect: { stamina: 10, money: -20 }, cost: 20 },
+                    { id: 'health_yoga', name: '瑜伽冥想', category: 'health',
+                      desc: '瑜伽放松身心', effect: { stamina: 6, charm: 3 }, cost: 15 },
+                    { id: 'health_nature', name: '户外活动', category: 'health',
+                      desc: '公园散步远足', effect: { stamina: 5, charm: 2 }, cost: 0 }
+                ];
+            }
+            
+            getRandomEvents() {
+                return [
+                    { 
+                        name: '幸运日', 
+                        desc: '今天运气特别好！所有活动效果增强50%',
+                        effect: (activity) => {
+                            const enhanced = {};
+                            for (const [attr, value] of Object.entries(activity.effect)) {
+                                enhanced[attr] = Math.round(value * 1.5);
+                            }
+                            return enhanced;
+                        },
+                        chance: 0.05,
+                        duration: 1
+                    },
+                    { 
+                        name: '突发疾病', 
+                        desc: '感冒了，体力下降，本周活动效果减弱',
+                        effect: { stamina: -20 },
+                        chance: 0.03,
+                        duration: 7
+                    },
+                    { 
+                        name: '意外之财', 
+                        desc: '捡到钱包归还失主，获得酬金',
+                        effect: { money: 100, charm: 5 },
+                        chance: 0.04,
+                        duration: 0
+                    },
+                    { 
+                        name: '学习灵感', 
+                        desc: '突然有了学习灵感，智力大幅提升',
+                        effect: { intelligence: 15 },
+                        chance: 0.03,
+                        duration: 0
+                    },
+                    { 
+                        name: '社交邀请', 
+                        desc: '收到重要社交活动邀请',
+                        effect: { charm: 10, money: 50 },
+                        chance: 0.04,
+                        duration: 0
+                    }
+                ];
+            }
+            
+            getAchievements() {
+                return [
+                    { id: 'study_5', name: '学习达人', desc: '连续学习5天', condition: (char) => this.checkStudyStreak(char) >= 5, unlocked: false },
+                    { id: 'intelligence_80', name: '聪明绝顶', desc: '智力达到80点', condition: (char) => char.attributes.intelligence >= 80, unlocked: false },
+                    { id: 'charm_70', name: '魅力四射', desc: '魅力达到70点', condition: (char) => char.attributes.charm >= 70, unlocked: false },
+                    { id: 'money_1000', name: '小有积蓄', desc: '资金达到1000', condition: (char) => char.attributes.money >= 1000, unlocked: false },
+                    { id: 'complete_month', name: '月度计划', desc: '完成一个月的所有日程', condition: (char) => char.week >= 4, unlocked: false },
+                    { id: 'all_activities', name: '全能选手', desc: '尝试所有类型的活动', condition: (char) => this.checkAllActivities(char), unlocked: false },
+                    { id: 'perfect_week', name: '完美一周', desc: '一周内安排7个不同活动', condition: (char) => this.checkPerfectWeek(char), unlocked: false }
+                ];
+            }
+            
+            checkStudyStreak(char) {
+                // 简化的连续学习检查
+                return Math.floor(Math.random() * 10); // 模拟数据
+            }
+            
+            checkAllActivities(char) {
+                const categories = new Set();
+                Object.values(char.weekSchedule || {}).forEach(activityId => {
+                    const activity = this.activities.find(a => a.id === activityId);
+                    if (activity) categories.add(activity.category);
+                });
+                return categories.size >= 5;
+            }
+            
+            checkPerfectWeek(char) {
+                const weekSchedule = char.weekSchedule[char.week];
+                if (!weekSchedule) return false;
+                
+                const activities = new Set(Object.values(weekSchedule));
+                return activities.size >= 7;
+            }
+            
+            init() {
+                this.renderAll();
+                this.setupEventListeners();
+                this.setupTabs();
+                this.initChart();
+                this.checkRandomEvent();
+                this.updateAchievements();
+                
+                // 自动保存提醒
+                setInterval(() => {
+                    this.autoSave();
+                }, 60000); // 每分钟自动保存
+            }
+            
+            renderAll() {
+                this.updateWeekDisplay();
+                this.renderSchedule();
+                this.updateCharacterDisplay();
+                this.updateAttributesDisplay();
+                this.renderEvents();
+                this.renderActivitiesLibrary();
+                this.renderWeeklyGoals();
+                this.renderAchievements();
+                this.updateChart();
+            }
+            
+            updateWeekDisplay() {
+                document.getElementById('current-week').textContent = this.currentChar.week;
+                document.getElementById('current-month-week').textContent = this.currentChar.monthWeek;
+                document.getElementById('character-week').textContent = this.currentChar.week;
+            }
+            
+            renderSchedule() {
+                const container = document.getElementById('schedule-container');
+                container.innerHTML = '';
+                
+                // 初始化本周安排
+                if (!this.currentChar.weekSchedule[this.currentChar.week]) {
+                    this.currentChar.weekSchedule[this.currentChar.week] = {};
+                }
+                
+                // 创建每天的日程卡片
+                this.weekDays.forEach((day, index) => {
+                    const dayCard = document.createElement('div');
+                    dayCard.className = 'day-card';
+                    
+                    const dayNumber = (this.currentChar.week - 1) * 7 + index + 1;
+                    
+                    const selectedActivity = this.currentChar.weekSchedule[this.currentChar.week][day];
+                    const activity = selectedActivity ? this.activities.find(a => a.id === selectedActivity) : null;
+                    
+                    dayCard.innerHTML = `
+                        <div class="day-header">
+                            <div class="day-name">${day}</div>
+                            <div class="day-number">${dayNumber}</div>
+                        </div>
+                        <div style="margin-bottom: 10px; font-size: 0.85rem; color: #666;">
+                            今日可安排一项活动
+                        </div>
+                        <select class="activity-select" data-day="${day}">
+                            <option value="">请选择活动</option>
+                            ${this.activities.map(act => {
+                                const selected = selectedActivity === act.id ? 'selected' : '';
+                                const categoryClass = `category-${act.category}`;
+                                return `<option value="${act.id}" ${selected}>
+                                    ${act.name} <span class="activity-category ${categoryClass}">${this.activityCategories[act.category].name}</span>
+                                </option>`;
+                            }).join('')}
+                        </select>
+                        ${selectedActivity ? `
+                            <div class="selected-activity">
+                                <strong>已安排：</strong>${activity.name}
+                                ${activity.cost > 0 ? `<br><small>花费：${activity.cost}元</small>` : ''}
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    container.appendChild(dayCard);
+                });
+                
+                // 添加活动选择事件监听
+                document.querySelectorAll('.activity-select').forEach(select => {
+                    select.addEventListener('change', (e) => this.handleActivitySelect(e));
+                });
+            }
+            
+            handleActivitySelect(event) {
+                const select = event.target;
+                const day = select.getAttribute('data-day');
+                const activityId = select.value;
+                
+                if (activityId) {
+                    this.currentChar.weekSchedule[this.currentChar.week][day] = activityId;
+                    
+                    // 更新卡片显示
+                    const card = select.closest('.day-card');
+                    let activityDiv = card.querySelector('.selected-activity');
+                    const activity = this.activities.find(a => a.id === activityId);
+                    
+                    if (!activityDiv) {
+                        activityDiv = document.createElement('div');
+                        activityDiv.className = 'selected-activity';
+                        select.parentNode.insertBefore(activityDiv, select.nextSibling);
+                    }
+                    
+                    activityDiv.innerHTML = `
+                        <strong>已安排：</strong>${activity.name}
+                        ${activity.cost > 0 ? `<br><small>花费：${activity.cost}元</small>` : ''}
+                    `;
+                } else {
+                    delete this.currentChar.weekSchedule[this.currentChar.week][day];
+                    
+                    // 移除活动显示
+                    const card = select.closest('.day-card');
+                    const activityDiv = card.querySelector('.selected-activity');
+                    if (activityDiv) {
+                        activityDiv.remove();
+                    }
+                }
+            }
+            
+            updateCharacterDisplay() {
+                document.getElementById('current-character').textContent = this.currentChar.name;
+                document.getElementById('current-avatar').textContent = this.currentChar.avatar;
+            }
+            
+            updateAttributesDisplay() {
+                const attrs = this.currentChar.attributes;
+                
+                document.getElementById('intelligence').textContent = attrs.intelligence;
+                document.getElementById('charm').textContent = attrs.charm;
+                document.getElementById('stamina').textContent = attrs.stamina;
+                document.getElementById('money').textContent = attrs.money;
+                
+                document.getElementById('intelligence-bar').style.width = `${Math.min(100, attrs.intelligence)}%`;
+                document.getElementById('charm-bar').style.width = `${Math.min(100, attrs.charm)}%`;
+                document.getElementById('stamina-bar').style.width = `${Math.min(100, attrs.stamina)}%`;
+                document.getElementById('money-bar').style.width = `${Math.min(100, attrs.money / 10)}%`;
+            }
+            
+            renderEvents() {
+                const eventList = document.getElementById('event-list');
+                eventList.innerHTML = '';
+                
+                const recentEvents = this.currentChar.events.slice(-10).reverse();
+                
+                if (recentEvents.length === 0) {
+                    eventList.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">暂无事件记录</div>';
+                    return;
+                }
+                
+                recentEvents.forEach(event => {
+                    const eventItem = document.createElement('div');
+                    eventItem.className = 'event-item';
+                    
+                    const effectsHtml = event.effects.map(effect => {
+                        const className = effect.value.toString().startsWith('+') ? 'positive' : 'negative';
+                        return `<span class="stat-change ${className}">${effect.type} ${effect.value}</span>`;
+                    }).join('');
+                    
+                    eventItem.innerHTML = `
+                        <div class="event-date">${event.date}</div>
+                        <div class="event-desc">${event.desc}</div>
+                        <div class="event-effect">${effectsHtml}</div>
+                    `;
+                    
+                    eventList.appendChild(eventItem);
+                });
+            }
+            
+            renderActivitiesLibrary() {
+                const container = document.getElementById('activities-library');
+                container.innerHTML = '';
+                
+                // 按类别分组
+                const activitiesByCategory = {};
+                this.activities.forEach(activity => {
+                    if (!activitiesByCategory[activity.category]) {
+                        activitiesByCategory[activity.category] = [];
+                    }
+                    activitiesByCategory[activity.category].push(activity);
+                });
+                
+                // 渲染每个类别
+                Object.entries(activitiesByCategory).forEach(([category, activities]) => {
+                    const categoryInfo = this.activityCategories[category];
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.style.marginBottom = '20px';
+                    
+                    let activitiesHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">';
+                    
+                    activities.forEach(activity => {
+                        activitiesHtml += `
+                            <div style="padding: 10px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${categoryInfo.color}">
+                                <div style="font-weight: bold; margin-bottom: 5px;">${activity.name}</div>
+                                <div style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">${activity.desc}</div>
+                                <div style="font-size: 0.8rem;">
+                                    ${Object.entries(activity.effect).map(([attr, value]) => {
+                                        const attrName = this.getAttributeDisplayName(attr);
+                                        const sign = value >= 0 ? '+' : '';
+                                        const color = value >= 0 ? 'var(--success)' : 'var(--danger)';
+                                        return `<span style="color: ${color}; margin-right: 5px;">${attrName}${sign}${value}</span>`;
+                                    }).join('')}
+                                    ${activity.cost > 0 ? `<span style="color: var(--warning);">花费${activity.cost}元</span>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    activitiesHtml += '</div>';
+                    
+                    categoryDiv.innerHTML = `
+                        <h4 style="color: ${categoryInfo.color}; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-${categoryInfo.icon}"></i> ${categoryInfo.name}类活动
+                        </h4>
+                        ${activitiesHtml}
+                    `;
+                    
+                    container.appendChild(categoryDiv);
+                });
+            }
+            
+            renderWeeklyGoals() {
+                const container = document.getElementById('weekly-goals');
+                const goals = [
+                    { text: '智力达到80点', check: () => this.currentChar.attributes.intelligence >= 80 },
+                    { text: '尝试3种不同类型的活动', check: () => this.checkActivityTypes() >= 3 },
+                    { text: '完成5个日程安排', check: () => this.getScheduledDays() >= 5 },
+                    { text: '资金超过500元', check: () => this.currentChar.attributes.money >= 500 }
+                ];
+                
+                let completed = 0;
+                const goalsHtml = goals.map(goal => {
+                    const isCompleted = goal.check();
+                    if (isCompleted) completed++;
+                    return `
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px; background: ${isCompleted ? 'rgba(32, 201, 151, 0.1)' : '#f8f9fa'}; border-radius: 8px;">
+                            <i class="fas fa-${isCompleted ? 'check-circle' : 'circle'}" style="color: ${isCompleted ? 'var(--success)' : '#ccc'}"></i>
+                            <span style="${isCompleted ? 'text-decoration: line-through; color: #666;' : ''}">${goal.text}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                const progress = Math.round((completed / goals.length) * 100);
+                
+                container.innerHTML = `
+                    ${goalsHtml}
+                    <div style="margin-top: 15px; padding: 10px; background: rgba(255, 107, 157, 0.1); border-radius: 8px;">
+                        <div style="font-size: 0.9rem; color: #666;">本周进度</div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <div style="flex: 1; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                <div style="width: ${progress}%; height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.5s ease;"></div>
+                            </div>
+                            <span style="font-weight: bold; color: var(--primary);">${progress}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            checkActivityTypes() {
+                const weekSchedule = this.currentChar.weekSchedule[this.currentChar.week] || {};
+                const categories = new Set();
+                Object.values(weekSchedule).forEach(activityId => {
+                    const activity = this.activities.find(a => a.id === activityId);
+                    if (activity) categories.add(activity.category);
+                });
+                return categories.size;
+            }
+            
+            getScheduledDays() {
+                const weekSchedule = this.currentChar.weekSchedule[this.currentChar.week] || {};
+                return Object.keys(weekSchedule).length;
+            }
+            
+            renderAchievements() {
+                const container = document.getElementById('achievement-list');
+                const unlocked = this.currentChar.achievements.slice(-3).reverse();
+                
+                if (unlocked.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #666; padding: 10px;">暂无成就</div>';
+                    return;
+                }
+                
+                container.innerHTML = unlocked.map(ach => `
+                    <div class="achievement-item">
+                        <div class="achievement-desc">
+                            <strong>${ach.name}</strong><br>
+                            <small>${ach.desc}</small>
+                        </div>
+                        <div class="achievement-date">${new Date(ach.date).toLocaleDateString()}</div>
+                    </div>
+                `).join('');
+            }
+            
+            updateAchievements() {
+                this.achievements.forEach(achievement => {
+                    if (!achievement.unlocked && achievement.condition(this.currentChar)) {
+                        achievement.unlocked = true;
+                        this.unlockAchievement(achievement);
+                    }
+                });
+            }
+            
+            unlockAchievement(achievement) {
+                // 避免重复解锁
+                if (this.currentChar.achievements.some(a => a.id === achievement.id)) {
+                    return;
+                }
+                
+                const unlockedAchievement = {
+                    id: achievement.id,
+                    name: achievement.name,
+                    desc: achievement.desc,
+                    date: Date.now()
+                };
+                
+                this.currentChar.achievements.push(unlockedAchievement);
+                
+                // 显示成就通知
+                this.showAchievementNotification(unlockedAchievement);
+                
+                // 保存数据
+                this.saveData();
+            }
+            
+            showAchievementNotification(achievement) {
+                const eventDiv = document.getElementById('random-event');
+                const descDiv = document.getElementById('random-event-desc');
+                const effectsDiv = document.getElementById('random-event-effects');
+                
+                descDiv.innerHTML = `<strong style="color: var(--warning);">成就解锁：${achievement.name}</strong><br>${achievement.desc}`;
+                effectsDiv.innerHTML = '<div style="background: rgba(255, 193, 7, 0.2); padding: 8px; border-radius: 6px; color: #b38f00;"><i class="fas fa-trophy"></i> 恭喜解锁新成就！</div>';
+                
+                eventDiv.style.display = 'block';
+                eventDiv.style.borderTopColor = 'var(--warning)';
+                
+                // 5秒后自动关闭
+                setTimeout(() => {
+                    if (eventDiv.style.display === 'block') {
+                        eventDiv.style.display = 'none';
+                    }
+                }, 5000);
+            }
+            
+            checkRandomEvent() {
+                // 每天有10%的几率触发随机事件
+                if (Math.random() < 0.1) {
+                    const event = this.randomEvents[Math.floor(Math.random() * this.randomEvents.length)];
+                    if (Math.random() < event.chance) {
+                        this.triggerRandomEvent(event);
+                    }
+                }
+            }
+            
+            triggerRandomEvent(event) {
+                const eventDiv = document.getElementById('random-event');
+                const descDiv = document.getElementById('random-event-desc');
+                const effectsDiv = document.getElementById('random-event-effects');
+                
+                descDiv.textContent = event.desc;
+                
+                // 应用效果
+                if (typeof event.effect === 'function') {
+                    // 如果是函数效果，需要特殊处理
+                    effectsDiv.innerHTML = '<div style="color: var(--success);"><i class="fas fa-magic"></i> 特殊效果已激活！</div>';
+                } else {
+                    // 直接属性效果
+                    const effects = Object.entries(event.effect).map(([attr, value]) => {
+                        const attrName = this.getAttributeDisplayName(attr);
+                        const className = value >= 0 ? 'positive' : 'negative';
+                        const sign = value >= 0 ? '+' : '';
+                        return `<span class="stat-change ${className}">${attrName}${sign}${value}</span>`;
+                    }).join('');
+                    
+                    effectsDiv.innerHTML = effects;
+                    
+                    // 立即应用效果
+                    for (const [attr, value] of Object.entries(event.effect)) {
+                        if (this.currentChar.attributes[attr] !== undefined) {
+                            this.currentChar.attributes[attr] = Math.max(0, 
+                                this.currentChar.attributes[attr] + value);
+                        }
+                    }
+                    
+                    this.updateAttributesDisplay();
+                }
+                
+                eventDiv.style.display = 'block';
+                
+                // 记录事件
+                this.addEvent(`随机事件：${event.name}`, Object.entries(event.effect).map(([attr, value]) => ({
+                    type: this.getAttributeDisplayName(attr),
+                    value: value >= 0 ? `+${value}` : `${value}`
+                })));
+            }
+            
+            addEvent(desc, effects) {
+                const date = `第${this.currentChar.week}周 ${this.weekDays[new Date().getDay()] || '周一'}`;
+                
+                this.currentChar.events.push({
+                    date,
+                    desc,
+                    effects
+                });
+                
+                // 限制事件数量
+                if (this.currentChar.events.length > 50) {
+                    this.currentChar.events = this.currentChar.events.slice(-50);
+                }
+                
+                this.renderEvents();
+            }
+            
+            getAttributeDisplayName(attr) {
+                const names = {
+                    intelligence: '智力',
+                    charm: '魅力',
+                    stamina: '体力',
+                    money: '资金'
+                };
+                return names[attr] || attr;
+            }
+            
+            confirmWeekSchedule() {
+                const weekSchedule = this.currentChar.weekSchedule[this.currentChar.week] || {};
+                const scheduledDays = Object.keys(weekSchedule).length;
+                
+                if (scheduledDays < 3) {
+                    if (!confirm(`您只安排了${scheduledDays}天的活动，确定要确认本周安排吗？`)) {
+                        return;
+                    }
+                }
+                
+                // 应用每日活动效果
+                let totalCost = 0;
+                for (const [day, activityId] of Object.entries(weekSchedule)) {
+                    const activity = this.activities.find(a => a.id === activityId);
+                    if (!activity) continue;
+                    
+                    // 检查资金是否足够
+                    totalCost += activity.cost || 0;
+                }
+                
+                if (totalCost > this.currentChar.attributes.money) {
+                    alert(`资金不足！本周活动需要${totalCost}元，但你只有${this.currentChar.attributes.money}元。`);
+                    return;
+                }
+                
+                // 扣除总花费
+                this.currentChar.attributes.money -= totalCost;
+                
+                // 应用每个活动效果
+                for (const [day, activityId] of Object.entries(weekSchedule)) {
+                    const activity = this.activities.find(a => a.id === activityId);
+                    if (!activity) continue;
+                    
+                    // 应用效果
+                    const effects = [];
+                    for (const [attr, value] of Object.entries(activity.effect)) {
+                        if (this.currentChar.attributes[attr] !== undefined) {
+                            const oldValue = this.currentChar.attributes[attr];
+                            this.currentChar.attributes[attr] = Math.max(0, 
+                                Math.min(100, oldValue + value));
+                            effects.push({
+                                type: this.getAttributeDisplayName(attr),
+                                value: value >= 0 ? `+${value}` : `${value}`
+                            });
+                        }
+                    }
+                    
+                    // 添加事件记录
+                    this.addEvent(activity.name, effects);
+                }
+                
+                // 记录统计数据
+                this.recordStats();
+                
+                // 检查成就
+                this.updateAchievements();
+                
+                // 进入下一周
+                this.currentChar.week++;
+                this.currentChar.monthWeek = (this.currentChar.monthWeek % 4) + 1;
+                
+                // 如果超过最大周数，重置月份
+                if (this.currentChar.week > 8) { // 改为8周为一个周期
+                    this.currentChar.week = 1;
+                    alert("恭喜完成两个月的日程！新的周期开始，属性部分保留。");
+                }
+                
+                // 清除本周安排
+                delete this.currentChar.weekSchedule[this.currentChar.week];
+                
+                // 更新显示
+                this.updateWeekDisplay();
+                this.renderSchedule();
+                this.updateAttributesDisplay();
+                this.updateChart();
+                
+                // 检查随机事件
+                this.checkRandomEvent();
+                
+                // 保存数据
+                this.saveData();
+                
+                alert(`第${this.currentChar.week-1}周日程已确认！进入第${this.currentChar.week}周。`);
+            }
+            
+            recordStats() {
+                if (!this.currentChar.statsHistory) {
+                    this.currentChar.statsHistory = [];
+                }
+                
+                this.currentChar.statsHistory.push({
+                    week: this.currentChar.week,
+                    attributes: {...this.currentChar.attributes},
+                    date: Date.now()
+                });
+                
+                // 限制历史记录长度
+                if (this.currentChar.statsHistory.length > 20) {
+                    this.currentChar.statsHistory = this.currentChar.statsHistory.slice(-20);
+                }
+            }
+            
+            initChart() {
+                const ctx = document.getElementById('growth-chart').getContext('2d');
+                this.chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [
+                            {
+                                label: '智力',
+                                data: [],
+                                borderColor: '#6a5acd',
+                                backgroundColor: 'rgba(106, 90, 205, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: '魅力',
+                                data: [],
+                                borderColor: '#ff6b9d',
+                                backgroundColor: 'rgba(255, 107, 157, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: '体力',
+                                data: [],
+                                borderColor: '#4ecdc4',
+                                backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                                tension: 0.4
+                            },
+                            {
+                                label: '资金/10',
+                                data: [],
+                                borderColor: '#ffc107',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: '属性成长趋势'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+                
+                this.updateChart();
+            }
+            
+            updateChart() {
+                if (!this.chart || !this.currentChar.statsHistory || this.currentChar.statsHistory.length === 0) {
+                    return;
+                }
+                
+                const history = this.currentChar.statsHistory;
+                
+                this.chart.data.labels = history.map((_, index) => `第${index + 1}周`);
+                this.chart.data.datasets[0].data = history.map(stat => stat.attributes.intelligence);
+                this.chart.data.datasets[1].data = history.map(stat => stat.attributes.charm);
+                this.chart.data.datasets[2].data = history.map(stat => stat.attributes.stamina);
+                this.chart.data.datasets[3].data = history.map(stat => stat.attributes.money / 10);
+                
+                this.chart.update();
+            }
+            
+            resetWeekSchedule() {
+                if (confirm("确定要重置本周所有安排吗？")) {
+                    delete this.currentChar.weekSchedule[this.currentChar.week];
+                    this.renderSchedule();
+                }
+            }
+            
+            saveData() {
+                // 更新最后保存时间
+                this.appData.lastSave = Date.now();
+                
+                if (this.dataManager.saveData(this.appData)) {
+                    // 显示保存成功提示
+                    const saveBtn = document.getElementById('save-data');
+                    const originalText = saveBtn.innerHTML;
+                    saveBtn.innerHTML = '<i class="fas fa-check"></i> 保存成功';
+                    saveBtn.style.background = 'var(--success)';
+                    
+                    setTimeout(() => {
+                        saveBtn.innerHTML = originalText;
+                        saveBtn.style.background = '';
+                    }, 2000);
+                    
+                    return true;
+                } else {
+                    alert('保存失败，请检查浏览器存储权限。');
+                    return false;
+                }
+            }
+            
+            autoSave() {
+                // 每5分钟自动保存一次
+                if (this.appData.lastSave && Date.now() - this.appData.lastSave > 300000) {
+                    this.saveData();
+                }
+            }
+            
+            showCharacterModal() {
+                const modal = document.getElementById('character-modal');
+                const listDiv = document.getElementById('character-list');
+                
+                listDiv.innerHTML = this.appData.characters.map((char, index) => `
+                    <div style="padding: 15px; margin-bottom: 10px; background: ${index === this.appData.currentCharacterId ? 'rgba(255, 107, 157, 0.1)' : '#f8f9fa'}; border-radius: 10px; display: flex; align-items: center; gap: 15px; cursor: pointer;" onclick="app.switchCharacter(${index})">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${char.avatar}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold;">${char.name}</div>
+                            <div style="font-size: 0.85rem; color: #666;">第${char.week}周 | 智力: ${char.attributes.intelligence}</div>
+                        </div>
+                        ${index === this.appData.currentCharacterId ? 
+                          '<i class="fas fa-check" style="color: var(--success);"></i>' : ''}
+                    </div>
+                `).join('');
+                
+                modal.style.display = 'flex';
+            }
+            
+            switchCharacter(index) {
+                if (index >= 0 && index < this.appData.characters.length) {
+                    // 保存当前角色数据
+                    this.appData.characters[this.appData.currentCharacterId] = this.currentChar;
+                    
+                    // 切换角色
+                    this.appData.currentCharacterId = index;
+                    this.currentChar = this.appData.characters[index];
+                    
+                    // 更新显示
+                    this.renderAll();
+                    
+                    // 保存数据
+                    this.saveData();
+                    
+                    // 关闭模态框
+                    this.closeModal('character-modal');
+                    
+                    alert(`已切换到角色：${this.currentChar.name}`);
+                }
+            }
+            
+            createNewCharacter() {
+                const name = prompt('请输入新角色名称：', `角色${this.appData.characters.length + 1}`);
+                if (!name) return;
+                
+                const avatar = prompt('请输入角色头像字母（单字符）：', name.charAt(0).toUpperCase());
+                
+                const newChar = this.dataManager.createDefaultCharacter();
+                newChar.id = this.appData.characters.length;
+                newChar.name = name;
+                newChar.avatar = avatar || 'A';
+                
+                this.appData.characters.push(newChar);
+                this.switchCharacter(this.appData.characters.length - 1);
+            }
+            
+            showAllAchievements() {
+                const modal = document.getElementById('achievements-modal');
+                const container = document.getElementById('all-achievements');
+                
+                const unlockedIds = new Set(this.currentChar.achievements.map(a => a.id));
+                
+                container.innerHTML = this.achievements.map(ach => {
+                    const isUnlocked = unlockedIds.has(ach.id);
+                    return `
+                        <div style="padding: 15px; margin-bottom: 10px; background: ${isUnlocked ? 'rgba(255, 193, 7, 0.1)' : '#f8f9fa'}; border-radius: 10px; display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: ${isUnlocked ? 'var(--warning)' : '#ccc'}; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-${isUnlocked ? 'trophy' : 'lock'}"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: bold; color: ${isUnlocked ? 'var(--dark)' : '#999'}">${ach.name}</div>
+                                <div style="font-size: 0.9rem; color: #666;">${ach.desc}</div>
+                            </div>
+                            ${isUnlocked ? '<span style="color: var(--success); font-size: 0.85rem;">已解锁</span>' : 
+                                          '<span style="color: #999; font-size: 0.85rem;">未解锁</span>'}
+                        </div>
+                    `;
+                }).join('');
+                
+                modal.style.display = 'flex';
+            }
+            
+            setupEventListeners() {
+                document.getElementById('prev-week').addEventListener('click', () => {
+                    if (this.currentChar.week > 1) {
+                        this.currentChar.week--;
+                        this.currentChar.monthWeek = (this.currentChar.monthWeek - 2 + 4) % 4 + 1;
+                        this.updateWeekDisplay();
+                        this.renderSchedule();
+                    }
+                });
+                
+                document.getElementById('next-week').addEventListener('click', () => {
+                    if (this.currentChar.week < 52) { // 一年52周
+                        this.currentChar.week++;
+                        this.currentChar.monthWeek = (this.currentChar.monthWeek % 4) + 1;
+                        this.updateWeekDisplay();
+                        this.renderSchedule();
+                    }
+                });
+                
+                document.getElementById('confirm-week').addEventListener('click', () => this.confirmWeekSchedule());
+                document.getElementById('reset-week').addEventListener('click', () => this.resetWeekSchedule());
+                document.getElementById('save-data').addEventListener('click', () => this.saveData());
+                document.getElementById('new-character').addEventListener('click', () => this.createNewCharacter());
+                document.getElementById('switch-character').addEventListener('click', () => this.showCharacterModal());
+                document.getElementById('random-event-btn').addEventListener('click', () => {
+                    const event = this.randomEvents[Math.floor(Math.random() * this.randomEvents.length)];
+                    this.triggerRandomEvent(event);
+                });
+            }
+            
+            setupTabs() {
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabId = tab.getAttribute('data-tab');
+                        
+                        // 移除所有active类
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        
+                        // 添加active类
+                        tab.classList.add('active');
+                        document.getElementById(`${tabId}-tab`).classList.add('active');
+                        
+                        // 如果是统计标签，更新图表
+                        if (tabId === 'statistics') {
+                            setTimeout(() => this.chart?.resize(), 100);
+                        }
+                    });
+                });
+            }
+            
+            closeModal(modalId) {
+                document.getElementById(modalId).style.display = 'none';
+            }
+        }
+
+        // ==================== 全局函数 ====================
+        function closeRandomEvent() {
+            document.getElementById('random-event').style.display = 'none';
+        }
+        
+        function showAchievements() {
+            app.showAllAchievements();
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // ==================== 初始化应用 ====================
+        let app;
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new ScheduleProApp();
+            window.app = app; // 暴露到全局，方便调试
+        });
+    </script>
+</body>
+</html>
